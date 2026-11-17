@@ -521,7 +521,8 @@ body {
   color: var(--text-muted);
 }
 
-.angle-presets {
+.angle-presets,
+.size-presets {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

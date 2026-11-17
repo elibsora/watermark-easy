@@ -17,7 +17,7 @@ const state = {
   position: 'center',    // 9 אפשרויות
   bgStyle: 'none',       // 'none' | 'dark' | 'light'
   opacity: 0.6,
-  sizeLevel: 3,          // 1 עד 5
+  sizePercent: 30,       // 5% עד 100%
   textColor: '#ffffff',
   rotation: 0,           // זווית מדויקת במעלות (-180 עד 180)
   
@@ -61,6 +61,7 @@ const elements = {
   opacityValue: document.getElementById('opacityValue'),
   sizeSlider: document.getElementById('sizeSlider'),
   sizeValue: document.getElementById('sizeValue'),
+  sizePresets: document.querySelectorAll('.btn-size-preset'),
   angleSlider: document.getElementById('angleSlider'),
   angleNumberInput: document.getElementById('angleNumberInput'),
   anglePresets: document.querySelectorAll('.btn-preset'),
@@ -154,7 +155,12 @@ async function loadSavedSettings() {
       if (saved.textColor) state.textColor = saved.textColor;
       if (saved.bgStyle) state.bgStyle = saved.bgStyle;
       if (saved.opacity !== undefined) state.opacity = saved.opacity;
-      if (saved.sizeLevel !== undefined) state.sizeLevel = saved.sizeLevel;
+      if (saved.sizePercent !== undefined) {
+        state.sizePercent = saved.sizePercent;
+      } else if (saved.sizeLevel !== undefined) {
+        const legacyMap = [10, 20, 30, 50, 75];
+        state.sizePercent = legacyMap[saved.sizeLevel - 1] || 30;
+      }
       if (saved.rotation !== undefined) state.rotation = saved.rotation;
       if (saved.position) state.position = saved.position;
       if (saved.destChoice) state.destChoice = saved.destChoice;
@@ -184,7 +190,7 @@ function saveSettings() {
       textColor: state.textColor,
       bgStyle: state.bgStyle,
       opacity: state.opacity,
-      sizeLevel: state.sizeLevel,
+      sizePercent: state.sizePercent,
       rotation: state.rotation,
       position: state.position,
       destChoice: state.destChoice
@@ -235,8 +241,7 @@ function applyStateToUI() {
   elements.opacityValue.textContent = `${opPercent}%`;
 
   // גודל
-  elements.sizeSlider.value = state.sizeLevel;
-  elements.sizeValue.textContent = sizeLabels[state.sizeLevel - 1];
+  setSizePercent(state.sizePercent, false);
 
   // זווית
   setRotationAngle(state.rotation, false);
@@ -319,10 +324,13 @@ function initEventListeners() {
 
   // גודל
   elements.sizeSlider.addEventListener('input', (e) => {
-    state.sizeLevel = parseInt(e.target.value, 10);
-    elements.sizeValue.textContent = sizeLabels[state.sizeLevel - 1];
-    saveSettings();
-    renderPreview();
+    setSizePercent(parseInt(e.target.value, 10));
+  });
+
+  elements.sizePresets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setSizePercent(parseInt(btn.dataset.size, 10));
+    });
   });
 
   // זווית סיבוב מדויקת
@@ -435,6 +443,34 @@ function updateDestinationUI() {
     elements.chosenCustomFolderName.style.display = 'none';
     elements.chooseFolderBtnText.textContent = '📂 לחצו לבחירת תיקייה לשמירה...';
   }
+}
+
+function setSizePercent(percent, triggerSave = true) {
+  state.sizePercent = Math.max(5, Math.min(100, percent));
+  elements.sizeSlider.value = state.sizePercent;
+  elements.sizeValue.textContent = getSizeDescription(state.sizePercent);
+
+  elements.sizePresets.forEach(btn => {
+    if (parseInt(btn.dataset.size, 10) === state.sizePercent) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  if (triggerSave) {
+    saveSettings();
+  }
+  renderPreview();
+}
+
+function getSizeDescription(percent) {
+  if (percent <= 12) return `${percent}% (קטן מאוד)`;
+  if (percent <= 22) return `${percent}% (קטן)`;
+  if (percent <= 38) return `${percent}% (בינוני)`;
+  if (percent <= 58) return `${percent}% (גדול)`;
+  if (percent <= 80) return `${percent}% (ענק)`;
+  return `${percent}% (על כל התמונה)`;
 }
 
 function setRotationAngle(angle, triggerSave = true) {
@@ -660,9 +696,9 @@ function drawBird(ctx, x, y, size) {
    ======================================================== */
 function drawWatermark(ctx, imgWidth, imgHeight) {
   const baseDim = Math.min(imgWidth, imgHeight);
-  const sizeScales = [0.035, 0.05, 0.07, 0.10, 0.14];
-  const scale = sizeScales[state.sizeLevel - 1];
-  const fontSize = Math.max(16, Math.round(baseDim * scale));
+  // גודל פונט יחסי לרזולוציה ולסליידר (הגדלה משמעותית עד 100% רוחב)
+  const scale = (state.sizePercent / 100) * 0.28;
+  const fontSize = Math.max(14, Math.round(baseDim * scale));
 
   ctx.save();
 
@@ -730,7 +766,7 @@ function drawTextWatermark(ctx, imgWidth, imgHeight, baseDim, fontSize) {
 
 function drawLogoWatermark(ctx, imgWidth, imgHeight, baseDim) {
   const logo = state.logoImage;
-  const targetWidth = baseDim * (0.08 + state.sizeLevel * 0.04);
+  const targetWidth = baseDim * (state.sizePercent / 100);
   const targetHeight = (logo.height / logo.width) * targetWidth;
 
   const coords = calculate9PositionCoordinates(state.position, imgWidth, imgHeight, targetWidth, targetHeight, baseDim);
