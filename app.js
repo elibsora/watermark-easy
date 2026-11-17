@@ -746,7 +746,7 @@ function drawPlaceholderLogoWatermark(ctx, imgWidth, imgHeight, baseDim, fontSiz
   ctx.font = `bold ${Math.round(fontSize * 0.65)}px "Segoe UI", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🖼️ העלו לוגו משמאל', 0, 0);
+  ctx.fillText('🖼️ העלו לוגו בשביל תצוגה מקדימה', 0, 0);
 }
 
 function calculate9PositionCoordinates(position, imgWidth, imgHeight, elementWidth, elementHeight, baseDim) {
