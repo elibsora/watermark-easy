@@ -1,11 +1,11 @@
 /**
  * סימן מים בקליק - Watermark Easy
- * קוד מלא עם שמירת הגדרות ב-localStorage, בחירת זווית במעלות בודדות,
- * תמיכה בבחירת יעד שמירה, והעלאת לוגו מרכזית.
+ * קוד מלא עם תמיכה בשמירה ישירה לתיקייה (ללא כיווץ וללא קובץ ZIP),
+ * שמירת הגדרות ב-localStorage, זווית מדויקת במעלות והעלאת לוגו.
  */
 
-const STORAGE_KEY = 'watermark_easy_settings_v2';
-const LOGO_STORAGE_KEY = 'watermark_easy_logo_data_v2';
+const STORAGE_KEY = 'watermark_easy_settings_v3';
+const LOGO_STORAGE_KEY = 'watermark_easy_logo_data_v3';
 
 // מצב האפליקציה (State)
 const state = {
@@ -22,13 +22,13 @@ const state = {
   rotation: 0,           // זווית מדויקת במעלות (-180 עד 180)
   
   // יעד שמירה
-  destChoice: 'source_subfolder', // 'source_subfolder' | 'custom_folder' | 'downloads'
+  destChoice: 'folder',  // 'folder' (ישירות לתיקייה ללא ZIP) | 'individual_downloads' | 'zip'
   customOutputDirHandle: null,
   customOutputDirName: '',
 
   // קבצים לעיבוד
   selectedFiles: [],     // [{ file, name, type, handle }]
-  folderHandle: null,    // תיקיית מקור
+  folderHandle: null,    // תיקיית מקור אם נבחרה
   
   // תצוגה מקדימה
   sampleIndex: 0,
@@ -87,8 +87,10 @@ const elements = {
 
   // יעד שמירה
   destChoiceRadios: document.querySelectorAll('input[name="destChoice"]'),
-  customFolderRow: document.getElementById('customFolderRow'),
+  folderDestHint: document.getElementById('folderDestHint'),
+  chooseFolderActionRow: document.getElementById('chooseFolderActionRow'),
   chooseCustomFolderBtn: document.getElementById('chooseCustomFolderBtn'),
+  chooseFolderBtnText: document.getElementById('chooseFolderBtnText'),
   chosenCustomFolderName: document.getElementById('chosenCustomFolderName'),
 
   // פעולה ושמירה
@@ -114,9 +116,30 @@ const sizeLabels = ['קטן מאוד', 'קטן', 'בינוני', 'גדול', 'ע
 window.addEventListener('DOMContentLoaded', async () => {
   await loadSavedSettings();
   initEventListeners();
+  updateDestinationUI();
   renderPreview();
   setupPWA();
 });
+
+/* ========================================================
+   בדיקה ואימות הרשאות כתיבה לתיקייה (File System Access API)
+   ======================================================== */
+async function verifyPermission(fileHandle, readWrite = true) {
+  if (!fileHandle) return false;
+  const options = {};
+  if (readWrite) options.mode = 'readwrite';
+  try {
+    if ((await fileHandle.queryPermission(options)) === 'granted') {
+      return true;
+    }
+    if ((await fileHandle.requestPermission(options)) === 'granted') {
+      return true;
+    }
+  } catch (err) {
+    console.warn('שגיאת בדיקת הרשאה:', err);
+  }
+  return false;
+}
 
 /* ========================================================
    ניהול שמירת הגדרות (Persistence ב-localStorage)
@@ -137,7 +160,6 @@ async function loadSavedSettings() {
       if (saved.destChoice) state.destChoice = saved.destChoice;
     }
 
-    // טעינת לוגו שמור (DataURL)
     const savedLogo = localStorage.getItem(LOGO_STORAGE_KEY);
     if (savedLogo) {
       const logoData = JSON.parse(savedLogo);
@@ -232,14 +254,13 @@ function applyStateToUI() {
   elements.destChoiceRadios.forEach(radio => {
     radio.checked = (radio.value === state.destChoice);
   });
-  toggleCustomFolderRow();
+  updateDestinationUI();
 }
 
 /* ========================================================
    האזנה לאירועים
    ======================================================== */
 function initEventListeners() {
-  // בחירת סוג סימן מים (טקסט או תמונה)
   elements.watermarkTypeRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {
       state.watermarkType = e.target.value;
@@ -249,14 +270,12 @@ function initEventListeners() {
     });
   });
 
-  // טקסט סימן מים
   elements.watermarkText.addEventListener('input', (e) => {
     state.text = e.target.value;
     saveSettings();
     renderPreview();
   });
 
-  // צבע טקסט
   elements.textColor.addEventListener('input', (e) => {
     state.textColor = e.target.value;
     updateActiveColorDot(e.target.value);
@@ -306,7 +325,7 @@ function initEventListeners() {
     renderPreview();
   });
 
-  // זווית סיבוב מדויקת (סליידר + קלט מספר)
+  // זווית סיבוב מדויקת
   elements.angleSlider.addEventListener('input', (e) => {
     setRotationAngle(parseInt(e.target.value, 10));
   });
@@ -319,7 +338,6 @@ function initEventListeners() {
     setRotationAngle(val);
   });
 
-  // כפתורי קיצור לזוויות
   elements.anglePresets.forEach(btn => {
     btn.addEventListener('click', () => {
       setRotationAngle(parseInt(btn.dataset.angle, 10));
@@ -341,12 +359,12 @@ function initEventListeners() {
   elements.destChoiceRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {
       state.destChoice = e.target.value;
-      toggleCustomFolderRow();
+      updateDestinationUI();
       saveSettings();
     });
   });
 
-  elements.chooseCustomFolderBtn.addEventListener('click', handlePickCustomOutputFolder);
+  elements.chooseCustomFolderBtn.addEventListener('click', handlePickDestinationFolder);
 
   // תצוגה מקדימה - החלפת דוגמה
   elements.changeSampleBtn.addEventListener('click', () => {
@@ -393,11 +411,29 @@ function toggleWatermarkTypeView() {
   }
 }
 
-function toggleCustomFolderRow() {
-  if (state.destChoice === 'custom_folder') {
-    elements.customFolderRow.style.display = 'flex';
+function updateDestinationUI() {
+  const isFolderSelected = (state.destChoice === 'folder');
+  elements.chooseFolderActionRow.style.display = isFolderSelected ? 'flex' : 'none';
+
+  if (!isFolderSelected) return;
+
+  if (state.customOutputDirHandle) {
+    // נבחרה תיקיית יעד מותאמת אישית
+    elements.folderDestHint.textContent = 'הקבצים יישמרו ישירות בתיקייה שנבחרה במחשב ללא שום כיווץ.';
+    elements.chosenCustomFolderName.style.display = 'inline-block';
+    elements.chosenCustomFolderName.textContent = `תיקיית יעד נבחרה: "${state.customOutputDirName}" ✅`;
+    elements.chooseFolderBtnText.textContent = '🔄 החלף תיקייה לשמירה';
+  } else if (state.folderHandle) {
+    // נבחרה תיקיית מקור בשלב 2
+    elements.folderDestHint.textContent = `הקבצים יישמרו ישירות בתוך תיקיית המקור "${state.folderHandle.name}" (בתת-תיקייה חדשה "תמונות_עם_סימן_מים") ללא כיווץ.`;
+    elements.chosenCustomFolderName.style.display = 'inline-block';
+    elements.chosenCustomFolderName.textContent = `יישמר ב: "${state.folderHandle.name}/תמונות_עם_סימן_מים" ✅`;
+    elements.chooseFolderBtnText.textContent = '📁 בחר תיקייה אחרת לשמירה';
   } else {
-    elements.customFolderRow.style.display = 'none';
+    // המשתמש בחר קבצים בודדים ועדיין לא בחר תיקיית יעד
+    elements.folderDestHint.textContent = 'הקבצים יישמרו ישירות כקבצים רגילים בתיקייה במחשב (ללא קובץ ZIP).';
+    elements.chosenCustomFolderName.style.display = 'none';
+    elements.chooseFolderBtnText.textContent = '📂 לחצו לבחירת תיקייה לשמירה...';
   }
 }
 
@@ -406,7 +442,6 @@ function setRotationAngle(angle, triggerSave = true) {
   elements.angleSlider.value = angle;
   elements.angleNumberInput.value = angle;
 
-  // עדכון כפתורי קיצור פעילים
   elements.anglePresets.forEach(btn => {
     if (parseInt(btn.dataset.angle, 10) === angle) {
       btn.classList.add('active');
@@ -635,7 +670,6 @@ function drawWatermark(ctx, imgWidth, imgHeight) {
     if (state.logoImage) {
       drawLogoWatermark(ctx, imgWidth, imgHeight, baseDim);
     } else {
-      // אם נבחרה תמונה אך טרם הועלתה, נציג חותמת הדגמה ברורה
       drawPlaceholderLogoWatermark(ctx, imgWidth, imgHeight, baseDim, fontSize);
     }
   } else {
@@ -806,6 +840,7 @@ async function handlePickFolder() {
   if ('showDirectoryPicker' in window) {
     try {
       const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      await verifyPermission(dirHandle, true);
       state.folderHandle = dirHandle;
 
       const files = [];
@@ -830,6 +865,7 @@ async function handlePickFolder() {
 
       state.selectedFiles = files;
       updateFilesSummary(true, dirHandle.name);
+      updateDestinationUI();
       loadUserPreviewImage();
 
     } catch (err) {
@@ -865,23 +901,32 @@ function handleSelectedFiles(fileList, sourceName = '') {
 
   state.selectedFiles = validFiles;
   updateFilesSummary(false, sourceName);
+  updateDestinationUI();
   loadUserPreviewImage();
 }
 
-async function handlePickCustomOutputFolder() {
+async function handlePickDestinationFolder() {
   if ('showDirectoryPicker' in window) {
     try {
       const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-      state.customOutputDirHandle = dirHandle;
-      state.customOutputDirName = dirHandle.name;
-      elements.chosenCustomFolderName.textContent = `נבחרה תיקיית יעד: "${dirHandle.name}" ✅`;
+      const hasPerm = await verifyPermission(dirHandle, true);
+      if (hasPerm) {
+        state.customOutputDirHandle = dirHandle;
+        state.customOutputDirName = dirHandle.name;
+        state.destChoice = 'folder';
+        elements.destChoiceRadios.forEach(r => {
+          if (r.value === 'folder') r.checked = true;
+        });
+        updateDestinationUI();
+        saveSettings();
+      }
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.warn('לא נבחרה תיקייה מותאמת:', err);
       }
     }
   } else {
-    alert('הדפדפן אינו תומך בבחירת תיקיית יעד ישירה. הקבצים יישמרו בתיקיית ההורדות.');
+    alert('דפדפן זה אינו תומך בבחירת תיקייה ישירה. הקבצים יורדו כקבצים בודדים ישירות למחשב.');
   }
 }
 
@@ -938,6 +983,7 @@ function clearSelectedFiles() {
   elements.completedMessage.style.display = 'none';
   elements.progressArea.style.display = 'none';
 
+  updateDestinationUI();
   renderPreview();
 }
 
@@ -1002,10 +1048,58 @@ function setupDragAndDrop() {
 }
 
 /* ========================================================
-   עיבוד הקבצים ושמירה לפי היעד שנבחר
+   עיבוד הקבצים ושמירה ישירה לתיקייה (ללא ZIP)
    ======================================================== */
 async function startProcessing() {
   if (state.selectedFiles.length === 0) return;
+
+  let targetDirHandle = null;
+
+  // אם נבחרה שמירה ישירה לתיקייה במחשב
+  if (state.destChoice === 'folder') {
+    if (state.customOutputDirHandle) {
+      const hasPerm = await verifyPermission(state.customOutputDirHandle, true);
+      if (hasPerm) {
+        targetDirHandle = state.customOutputDirHandle;
+      }
+    } else if (state.folderHandle) {
+      const hasPerm = await verifyPermission(state.folderHandle, true);
+      if (hasPerm) {
+        try {
+          targetDirHandle = await state.folderHandle.getDirectoryHandle('תמונות_עם_סימן_מים', { create: true });
+          await verifyPermission(targetDirHandle, true);
+        } catch (err) {
+          console.warn('לא ניתן ליצור תת-תיקייה במקור:', err);
+        }
+      }
+    }
+
+    // אם עדיין אין תיקייה מוגדרת (למשל המשתמש בחר קבצים בודדים)
+    if (!targetDirHandle) {
+      if ('showDirectoryPicker' in window) {
+        try {
+          const picked = await window.showDirectoryPicker({ mode: 'readwrite' });
+          const hasPerm = await verifyPermission(picked, true);
+          if (hasPerm) {
+            state.customOutputDirHandle = picked;
+            state.customOutputDirName = picked.name;
+            targetDirHandle = picked;
+            updateDestinationUI();
+          } else {
+            alert('לא ניתנה הרשאת כתיבה לתיקייה שנבחרה.');
+            return;
+          }
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            // המשתמש ביטל את חלון בחירת התיקייה
+            return;
+          }
+        }
+      } else {
+        alert('הדפדפן אינו תומך בשמירה ישירה לתיקייה. הקבצים יורדו כקבצים בודדים.');
+      }
+    }
+  }
 
   elements.startProcessBtn.disabled = true;
   elements.progressArea.style.display = 'block';
@@ -1016,22 +1110,9 @@ async function startProcessing() {
   let processed = 0;
   const processedResults = [];
 
-  // קביעת תיקיית יעד לשמירה
-  let targetDirHandle = null;
-
-  if (state.destChoice === 'custom_folder' && state.customOutputDirHandle) {
-    targetDirHandle = state.customOutputDirHandle;
-  } else if (state.destChoice === 'source_subfolder' && state.folderHandle) {
-    try {
-      targetDirHandle = await state.folderHandle.getDirectoryHandle('תמונות_עם_סימן_מים', { create: true });
-    } catch (err) {
-      console.warn('לא הצלחנו ליצור תת-תיקייה במקור:', err);
-    }
-  }
-
   for (let i = 0; i < total; i++) {
     const item = state.selectedFiles[i];
-    updateProgress(i, total, `מעבד את הקובץ: ${item.name}...`);
+    updateProgress(i, total, `מעבד ושומר: ${item.name}...`);
 
     try {
       let resultBlob = null;
@@ -1047,6 +1128,7 @@ async function startProcessing() {
 
       if (resultBlob) {
         if (targetDirHandle) {
+          // כתיבה ישירה לתיקייה במחשב ללא שום כיווץ!
           const fileHandle = await targetDirHandle.getFileHandle(outputFileName, { create: true });
           const writable = await fileHandle.createWritable();
           await writable.write(resultBlob);
@@ -1137,26 +1219,23 @@ async function processPdfFile(file) {
   return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
 }
 
-function finishProcessing(targetDirHandle, processedResults) {
+async function finishProcessing(targetDirHandle, processedResults) {
   elements.startProcessBtn.disabled = false;
   elements.progressArea.style.display = 'none';
   elements.completedMessage.style.display = 'block';
 
   if (targetDirHandle) {
-    const folderName = state.destChoice === 'custom_folder' 
-      ? `התיקייה שבחרתם: "${state.customOutputDirName}"`
-      : 'התיקייה החדשה: "תמונות_עם_סימן_מים" (בתוך תיקיית המקור)';
-
+    const folderName = state.customOutputDirName || targetDirHandle.name || 'התיקייה שנבחרה';
     elements.completedDetails.innerHTML = `
-      כל הקבצים נשמרו ישירות במחשב שלכם בהצלחה!<br>
-      מיקום השמירה: <strong>${folderName}</strong>.
+      🎉 כל ${state.selectedFiles.length} הקבצים נשמרו בהצלחה ישירות בתיקייה:<br>
+      <strong style="font-size: 19px; color: #065f46;">📁 "${folderName}"</strong><br>
+      (הקבצים נשמרו כרגיל ישירות במחשב שלכם, ללא שום כיווץ וללא קובץ ZIP).
     `;
   } else {
-    if (processedResults.length === 1) {
-      downloadBlob(processedResults[0].blob, processedResults[0].name);
-      elements.completedDetails.textContent = `הקובץ "${processedResults[0].name}" נשמר בתיקיית ההורדות של המחשב שלכם.`;
-    } else if (processedResults.length > 1) {
-      elements.completedDetails.textContent = `כל ${processedResults.length} הקבצים עובדו בהצלחה!`;
+    // אם לא נשמר בתיקייה:
+    if (state.destChoice === 'zip') {
+      // רק אם המשתמש בחר בפירוש ZIP
+      elements.completedDetails.textContent = `כל ${processedResults.length} הקבצים עובדו ונשמרים כעת כקובץ ZIP.`;
       elements.downloadZipContainer.style.display = 'block';
 
       elements.downloadZipBtn.onclick = async () => {
@@ -1176,6 +1255,13 @@ function finishProcessing(targetDirHandle, processedResults) {
       };
 
       elements.downloadZipBtn.click();
+    } else {
+      // הורדה כקבצים בודדים ישירות (ללא ZIP!)
+      elements.completedDetails.textContent = `כל ${processedResults.length} הקבצים נשמרו בהצלחה ישירות בתיקיית ההורדות של המחשב שלכם (ללא כיווץ).`;
+      for (const res of processedResults) {
+        downloadBlob(res.blob, res.name);
+        await new Promise(r => setTimeout(r, 200));
+      }
     }
   }
 }

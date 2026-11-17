@@ -396,34 +396,37 @@
           </div>
 
           <div class="destination-options">
+            <!-- אפשרות 1: ישירות לתיקייה במחשב ללא כיווץ -->
             <label class="dest-option-card">
-              <input type="radio" name="destChoice" value="source_subfolder" checked>
+              <input type="radio" name="destChoice" value="folder" checked>
               <div class="dest-option-body">
-                <strong>באותה תיקייה שממנה נלקחו הקבצים</strong>
-                <span>ייווצר תיקייה חדשה בשם <code>תמונות_עם_סימן_מים</code> באותו המקום בדיוק</span>
-              </div>
-            </label>
-
-            <label class="dest-option-card">
-              <input type="radio" name="destChoice" value="custom_folder">
-              <div class="dest-option-body">
-                <strong>בחר תיקייה ספציפית אחרת במחשב</strong>
-                <span>שמירה ישירה לתיקייה שתבחרו בעצמכם (שולחן העבודה, כונן אחר וכו')</span>
-                <div id="customFolderRow" class="custom-folder-row" style="display: none;">
+                <strong>📁 שמירה ישירה לתיקייה במחשב (ללא כיווץ וללא קובץ ZIP)</strong>
+                <span id="folderDestHint">הקבצים יישמרו ישירות כקבצים רגילים בתיקייה שתבחרו במחשב.</span>
+                <div id="chooseFolderActionRow" class="custom-folder-row">
                   <button type="button" id="chooseCustomFolderBtn" class="btn btn-outline btn-sm">
                     <span class="btn-icon">📂</span>
-                    לחצו לבחירת תיקיית יעד...
+                    <span id="chooseFolderBtnText">בחר תיקייה לשמירה במחשב...</span>
                   </button>
-                  <span id="chosenCustomFolderName" class="chosen-folder-label">טרם נבחרה תיקייה</span>
+                  <span id="chosenCustomFolderName" class="chosen-folder-label" style="display: none;"></span>
                 </div>
               </div>
             </label>
 
+            <!-- אפשרות 2: הורדה ישירה כקבצים בודדים -->
             <label class="dest-option-card">
-              <input type="radio" name="destChoice" value="downloads">
+              <input type="radio" name="destChoice" value="individual_downloads">
               <div class="dest-option-body">
-                <strong>תיקיית ההורדות של המחשב (Downloads)</strong>
-                <span>הורדה ישירה כקובץ בודד או כקובץ ZIP מרוכז</span>
+                <strong>📥 הורדה כקבצים בודדים (לתיקיית ההורדות של המחשב, ללא ZIP)</strong>
+                <span>כל תמונה או מסמך ירדו ישירות כקובץ עצמאי לתיקיית ההורדות שלכם.</span>
+              </div>
+            </label>
+
+            <!-- אפשרות 3: קובץ ZIP -->
+            <label class="dest-option-card">
+              <input type="radio" name="destChoice" value="zip">
+              <div class="dest-option-body">
+                <strong>📦 הורדה מרוכזת כקובץ ZIP אחד</strong>
+                <span>כל הקבצים ייארזו לתוך קובץ ZIP מכווץ יחיד לנוחות שליחה.</span>
               </div>
             </label>
           </div>
