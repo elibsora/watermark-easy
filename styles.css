@@ -1,0 +1,1169 @@
+/* עיצוב מותאם לקהל מבוגר: ברור, ניגודיות גבוהה, פונטים גדולים ומרווחים */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --success: #059669;
+  --success-hover: #047857;
+  --success-light: #ecfdf5;
+  --text-dark: #1e293b;
+  --text-muted: #475569;
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --border: #cbd5e1;
+  --border-focus: #3b82f6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  line-height: 1.6;
+  font-size: 17px;
+  padding-bottom: 40px;
+}
+
+/* כותרת עליונה */
+.app-header {
+  background: #ffffff;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 16px 24px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  font-size: 38px;
+  background: var(--primary-light);
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid #bfdbfe;
+}
+
+.logo-area h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.saved-settings-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+}
+
+.reset-link {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0 4px;
+}
+
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--success-light);
+  color: #065f46;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-icon {
+  font-size: 18px;
+}
+
+/* מיכל ראשי */
+.main-container {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* כרטיסי שלבים */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.step-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.step-number {
+  background-color: var(--primary);
+  color: #ffffff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-header h2 {
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.step-header p {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+/* חלוקה ל-2 עמודות */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* בחירה מרכזית: טקסט או לוגו/תמונה */
+.section-label {
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.watermark-type-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.type-tab {
+  cursor: pointer;
+  display: block;
+}
+
+.type-tab input[type="radio"] {
+  display: none;
+}
+
+.type-tab-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 14px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.type-tab:hover .type-tab-card {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.type-tab input[type="radio"]:checked + .type-tab-card {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+}
+
+.type-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.type-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.type-title {
+  font-size: 17px;
+  color: #0f172a;
+}
+
+.type-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* טפסים ובקרות */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 17px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.text-large {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* כרטיס העלאת לוגו מרכזי */
+.logo-upload-card {
+  border: 2px dashed #94a3b8;
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.logo-upload-card.dragover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.logo-empty-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-big-icon {
+  font-size: 46px;
+}
+
+.logo-empty-view h3 {
+  font-size: 19px;
+  color: #0f172a;
+}
+
+.logo-empty-view p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.logo-drop-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.logo-active-view {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  text-align: right;
+}
+
+.logo-preview-thumb-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: #f1f5f9;
+  background-image: 
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-preview-thumb {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logo-name-text {
+  font-size: 16px;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.logo-size-badge {
+  font-size: 12px;
+  color: #047857;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.logo-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+/* רדיו כרטיסים לבחירת רקע */
+.radio-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.radio-card:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.radio-card input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.radio-card input[type="radio"]:checked + .radio-content {
+  color: var(--primary);
+}
+
+.radio-title {
+  display: block;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.radio-desc {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* סליידרים */
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.slider-badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.slider {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #e2e8f0;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* זווית סיבוב */
+.angle-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  background: #ffffff;
+}
+
+.angle-number-input {
+  width: 65px;
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  font-family: inherit;
+  color: var(--primary);
+}
+
+.angle-deg-symbol {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.angle-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-preset {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #ffffff;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: all 0.15s;
+}
+
+.btn-preset:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-preset.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* צבעים */
+.color-picker-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-input {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 2px;
+  background: #fff;
+}
+
+.quick-colors {
+  display: flex;
+  gap: 8px;
+}
+
+.color-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-dot:hover {
+  transform: scale(1.15);
+}
+
+.color-dot.active {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary);
+}
+
+.btn-text-danger {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+/* רשת 9 מיקומים */
+.positions-grid-container {
+  background: #f1f5f9;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 2px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.positions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pos-btn {
+  background: #ffffff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.pos-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.pos-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.pos-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pos-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* תצוגה מקדימה */
+.preview-box {
+  background: #f8fafc;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.preview-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.preview-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-nav {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-nav:hover {
+  background: #f1f5f9;
+}
+
+.canvas-wrapper {
+  background: #e2e8f0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  border: 1px solid #cbd5e1;
+}
+
+#previewCanvas {
+  max-width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-note {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+/* שלב 2: כפתורי בחירה */
+.choose-buttons-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .choose-buttons-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.choose-card {
+  border: 2px dashed #94a3b8;
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.choose-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.choose-icon {
+  font-size: 44px;
+}
+
+.choose-card h3 {
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.choose-card p {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 320px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+/* אזור גרירה */
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  background: #f8fafc;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.drop-icon {
+  font-size: 24px;
+}
+
+.drop-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* סיכום קבצים */
+.selected-summary {
+  margin-top: 18px;
+  background: var(--success-light);
+  border: 2px solid #a7f3d0;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.summary-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.summary-icon {
+  font-size: 28px;
+}
+
+.summary-info strong {
+  font-size: 18px;
+  color: #065f46;
+}
+
+.folder-origin-text {
+  font-size: 14px;
+  color: #047857;
+}
+
+/* בחירת יעד שמירה */
+.destination-card {
+  margin-top: 24px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.destination-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.destination-icon {
+  font-size: 32px;
+}
+
+.destination-header h3 {
+  font-size: 19px;
+  color: #0f172a;
+}
+
+.destination-header p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.destination-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dest-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dest-option-card:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.dest-option-card input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.dest-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.dest-option-body strong {
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.dest-option-body span {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.custom-folder-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.chosen-folder-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  background: #dcfce7;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #86efac;
+}
+
+/* שלב 3: הפעלה ושמירה */
+.highlight-card {
+  border: 2px solid #93c5fd;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.action-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+/* כפתורים כלליים */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-large {
+  padding: 14px 28px;
+  font-size: 18px;
+}
+
+.btn-huge {
+  padding: 18px 48px;
+  font-size: 22px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--success-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(5, 150, 105, 0.35);
+}
+
+.btn:disabled {
+  background: #94a3b8;
+  color: #f1f5f9;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 22px;
+}
+
+/* סרגל התקדמות */
+.progress-area {
+  width: 100%;
+  max-width: 600px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 18px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #059669);
+  transition: width 0.3s ease;
+}
+
+.progress-status {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* הודעת סיום */
+.completed-box {
+  background: #ecfdf5;
+  border: 2px solid #34d399;
+  border-radius: var(--radius-lg);
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.completed-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.completed-box h3 {
+  font-size: 24px;
+  color: #065f46;
+  margin-bottom: 6px;
+}
+
+.completed-box p {
+  font-size: 17px;
+  color: #047857;
+}
+
+/* שאלות ותשובות */
+.faq-card h2 {
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.faq-item summary {
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.faq-item summary:hover {
+  background: #f1f5f9;
+}
+
+.faq-answer {
+  padding: 14px 18px;
+  font-size: 16px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: #ffffff;
+  line-height: 1.7;
+}
+
+.faq-answer ul {
+  padding-right: 20px;
+  margin-top: 8px;
+}
+
+.faq-answer li {
+  margin-bottom: 6px;
+}
+
+code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+/* סרגל תחתון */
+.app-footer {
+  text-align: center;
+  margin-top: 30px;
+  color: var(--text-muted);
+  font-size: 14px;
+}

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>סימן מים בקליק - הוספת חותמת לתמונות ו-PDF</title>
+  <meta name="description" content="תוכנה קלה ובטוחה להוספת סימן מים לתמונות וקובצי PDF ישירות במחשב שלכם, ללא צורך בהתקנה וללא שליחת קבצים לאינטרנט.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- ספריות מקומיות (עובד 100% אופליין ללא אינטרנט) -->
+  <script src="lib/pdf-lib.min.js"></script>
+  <script src="lib/jszip.min.js"></script>
+</head>
+<body>
+
+  <!-- פס עליון נגיש ומרגיע -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <span class="logo-icon" aria-hidden="true">💧</span>
+        <div>
+          <h1>סימן מים בקליק</h1>
+          <p class="subtitle">הוספת חותמת לתמונות וקובצי PDF בקלות וברוגע</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="installAppBtn" class="btn btn-secondary install-btn" style="display: none;">
+          <span class="btn-icon">💻</span>
+          התקן אפליקציה במחשב
+        </button>
+        <div class="saved-settings-badge" title="כל שינוי שתבצעו נשמר אוטומטית במחשב">
+          <span class="badge-icon">💾</span>
+          <span>ההגדרות נשמרות אוטומטית</span>
+          <button type="button" id="resetSettingsBtn" class="reset-link" title="שחזר את הגדרות ברירת המחדל">איפוס</button>
+        </div>
+        <div class="security-badge">
+          <span class="badge-icon">🔒</span>
+          <span>100% פרטי: הכל מעובד במחשב שלך בלבד</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- שלב 1: עיצוב סימן המים -->
+    <section class="card step-card">
+      <div class="step-header">
+        <span class="step-number">1</span>
+        <div>
+          <h2>מה להוסיף ואיך לעצב?</h2>
+          <p>בחרו בין טקסט לבין תמונה/לוגו, וקבעו את המיקום, הזווית והשקיפות</p>
+        </div>
+      </div>
+
+      <div class="step-body grid-2col">
+        <!-- הגדרות תוכן ומראה -->
+        <div class="controls-column">
+          
+          <!-- בחירה מרכזית: טקסט או לוגו/תמונה -->
+          <div class="form-group">
+            <label class="section-label">מה תרצו שיופיע כסימן מים?</label>
+            <div class="watermark-type-switcher">
+              <label class="type-tab">
+                <input type="radio" name="watermarkType" value="text" checked>
+                <div class="type-tab-card">
+                  <span class="type-icon">🔤</span>
+                  <div class="type-text-wrap">
+                    <strong class="type-title">טקסט כסימן מים</strong>
+                    <span class="type-desc">שם, זכויות יוצרים, תאריך ועוד</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="type-tab">
+                <input type="radio" name="watermarkType" value="image">
+                <div class="type-tab-card">
+                  <span class="type-icon">🖼️</span>
+                  <div class="type-text-wrap">
+                    <strong class="type-title">תמונה או לוגו</strong>
+                    <span class="type-desc">העלאת קובץ לוגו אישי (PNG/JPG)</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- תוכן טקסט (מוצג רק כשבוחרים טקסט) -->
+          <div id="textSection" class="watermark-content-section">
+            <div class="form-group">
+              <label for="watermarkText">טקסט החותמת (סימן המים):</label>
+              <input type="text" id="watermarkText" class="form-input text-large" value="כל הזכויות שמורות ©" placeholder="למשל: צולם על ידי דניאל / עותק לעיון">
+            </div>
+
+            <!-- צבע הטקסט -->
+            <div class="form-group">
+              <label for="textColor">צבע הטקסט:</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="textColor" value="#ffffff" class="color-input">
+                <div class="quick-colors">
+                  <button type="button" class="color-dot active" data-color="#ffffff" title="לבן" style="background:#ffffff; border:1px solid #ccc;"></button>
+                  <button type="button" class="color-dot" data-color="#000000" title="שחור" style="background:#000000;"></button>
+                  <button type="button" class="color-dot" data-color="#e11d48" title="אדום" style="background:#e11d48;"></button>
+                  <button type="button" class="color-dot" data-color="#2563eb" title="כחול" style="background:#2563eb;"></button>
+                  <button type="button" class="color-dot" data-color="#f59e0b" title="זהב" style="background:#f59e0b;"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- העלאת לוגו / תמונה (מוצג בולט כשבוחרים תמונה) -->
+          <div id="imageSection" class="watermark-content-section" style="display: none;">
+            <div class="form-group">
+              <label>תמונת הלוגו לסימן המים:</label>
+              
+              <!-- כרטיס העלאת לוגו מרכזי -->
+              <div id="logoDropZone" class="logo-upload-card">
+                <div id="logoEmptyView" class="logo-empty-view">
+                  <span class="logo-big-icon">🖼️</span>
+                  <h3>בחרו תמונת לוגו או סמל</h3>
+                  <p>מומלץ קובץ PNG עם רקע שקוף, או קובץ JPG / WebP</p>
+                  <label for="logoInput" class="btn btn-primary btn-large">
+                    <span class="btn-icon">📂</span>
+                    בחר קובץ לוגו מהמחשב
+                  </label>
+                  <span class="logo-drop-hint">או פשוט גררו תמונה לכאן</span>
+                </div>
+
+                <div id="logoActiveView" class="logo-active-view" style="display: none;">
+                  <div class="logo-preview-thumb-wrap">
+                    <img id="logoThumbImg" src="" alt="תצוגת לוגו" class="logo-preview-thumb">
+                  </div>
+                  <div class="logo-details">
+                    <strong id="logoFileNameText" class="logo-name-text">logo.png</strong>
+                    <span class="logo-size-badge" id="logoSizeBadge">שמור במחשב</span>
+                    <div class="logo-action-buttons">
+                      <label for="logoInput" class="btn-text">🔄 החלף תמונה</label>
+                      <button type="button" id="removeLogoBtn" class="btn-text-danger">✕ הסר לוגו</button>
+                    </div>
+                  </div>
+                </div>
+
+                <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" class="file-input-hidden">
+              </div>
+
+            </div>
+          </div>
+
+          <!-- סגנון רקע לחותמת -->
+          <div class="form-group">
+            <label>סגנון רקע החותמת:</label>
+            <div class="radio-cards">
+              <label class="radio-card">
+                <input type="radio" name="bgStyle" value="none" checked>
+                <span class="radio-content">
+                  <span class="radio-title">ללא רקע (שקוף לגמרי)</span>
+                  <span class="radio-desc">צף ישירות על התמונה עם צל עדין לקריאות מרבית</span>
+                </span>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="bgStyle" value="dark">
+                <span class="radio-content">
+                  <span class="radio-title">פס כהה שקוף</span>
+                  <span class="radio-desc">רקע שחור עדין שמבליט את החותמת</span>
+                </span>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="bgStyle" value="light">
+                <span class="radio-content">
+                  <span class="radio-title">פס בהיר שקוף</span>
+                  <span class="radio-desc">רקע לבן עדין ונעים</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- שקיפות -->
+          <div class="form-group">
+            <div class="slider-header">
+              <label for="opacitySlider">רמת שקיפות החותמת:</label>
+              <span id="opacityValue" class="slider-badge">60%</span>
+            </div>
+            <input type="range" id="opacitySlider" min="15" max="100" value="60" class="slider">
+            <div class="slider-labels">
+              <span>מאוד עדין ושקוף (15%)</span>
+              <span>בולט ואטום (100%)</span>
+            </div>
+          </div>
+
+          <!-- גודל החותמת -->
+          <div class="form-group">
+            <div class="slider-header">
+              <label for="sizeSlider">גודל החותמת (מותאם אוטומטית לרזולוציה):</label>
+              <span id="sizeValue" class="slider-badge">בינוני</span>
+            </div>
+            <input type="range" id="sizeSlider" min="1" max="5" value="3" class="slider">
+            <div class="slider-labels">
+              <span>קטן מאוד</span>
+              <span>קטן</span>
+              <span>בינוני</span>
+              <span>גדול</span>
+              <span>ענק</span>
+            </div>
+          </div>
+
+          <!-- זווית סיבוב מדויקת ברמת המעלה הבודדת -->
+          <div class="form-group angle-group">
+            <div class="slider-header">
+              <label for="angleSlider">זווית הסיבוב (במעלות):</label>
+              <div class="angle-input-wrap">
+                <input type="number" id="angleNumberInput" min="-180" max="180" value="0" class="angle-number-input">
+                <span class="angle-deg-symbol">°</span>
+              </div>
+            </div>
+            
+            <input type="range" id="angleSlider" min="-180" max="180" value="0" step="1" class="slider">
+            
+            <div class="slider-labels">
+              <span>180°- (הפוך)</span>
+              <span>0° (ישר)</span>
+              <span>180°+ (הפוך)</span>
+            </div>
+
+            <!-- כפתורי קיצור לזוויות נפוצות -->
+            <div class="angle-presets">
+              <button type="button" class="btn-preset active" data-angle="0">0° (ישר)</button>
+              <button type="button" class="btn-preset" data-angle="-45">45°- ↘</button>
+              <button type="button" class="btn-preset" data-angle="45">45°+ ↗</button>
+              <button type="button" class="btn-preset" data-angle="-30">30°- ↘</button>
+              <button type="button" class="btn-preset" data-angle="30">30°+ ↗</button>
+              <button type="button" class="btn-preset" data-angle="-90">90°- (אנכי)</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- בחירת 9 מיקומים + תצוגה מקדימה מיידית -->
+        <div class="preview-column">
+          <div class="form-group">
+            <label>בחרו את מיקום החותמת (לחצו על אחת מ-9 המשבצות):</label>
+            
+            <!-- רשת 9 מיקומים אינטראקטיבית וברורה -->
+            <div class="positions-grid-container">
+              <div class="positions-grid" role="radiogroup" aria-label="בחירת מיקום סימן המים מתוך 9 אפשרויות">
+                
+                <!-- שורה עליונה -->
+                <button type="button" class="pos-btn" data-pos="top-right" title="למעלה מימין">
+                  <span class="pos-icon">↗</span>
+                  <span class="pos-text">למעלה ימין</span>
+                </button>
+                <button type="button" class="pos-btn" data-pos="top-center" title="למעלה באמצע">
+                  <span class="pos-icon">⬆</span>
+                  <span class="pos-text">למעלה מרכז</span>
+                </button>
+                <button type="button" class="pos-btn" data-pos="top-left" title="למעלה משמאל">
+                  <span class="pos-icon">↖</span>
+                  <span class="pos-text">למעלה שמאל</span>
+                </button>
+
+                <!-- שורה אמצעית -->
+                <button type="button" class="pos-btn" data-pos="middle-right" title="במרכז מימין">
+                  <span class="pos-icon">➡</span>
+                  <span class="pos-text">מרכז ימין</span>
+                </button>
+                <button type="button" class="pos-btn active" data-pos="center" title="באמצע בדיוק">
+                  <span class="pos-icon">⏺</span>
+                  <span class="pos-text">אמצע בדיוק</span>
+                </button>
+                <button type="button" class="pos-btn" data-pos="middle-left" title="במרכז משמאל">
+                  <span class="pos-icon">⬅</span>
+                  <span class="pos-text">מרכז שמאל</span>
+                </button>
+
+                <!-- שורה תחתונה -->
+                <button type="button" class="pos-btn" data-pos="bottom-right" title="למטה מימין">
+                  <span class="pos-icon">↘</span>
+                  <span class="pos-text">למטה ימין</span>
+                </button>
+                <button type="button" class="pos-btn" data-pos="bottom-center" title="למטה באמצע">
+                  <span class="pos-icon">⬇</span>
+                  <span class="pos-text">למטה מרכז</span>
+                </button>
+                <button type="button" class="pos-btn" data-pos="bottom-left" title="למטה משמאל">
+                  <span class="pos-icon">↙</span>
+                  <span class="pos-text">למטה שמאל</span>
+                </button>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- אזור תצוגה מקדימה חיה -->
+          <div class="preview-box">
+            <div class="preview-header">
+              <span class="preview-title">👁️ תצוגה מקדימה חיה של החותמת</span>
+              <div class="preview-nav" id="previewNav" style="display: none;">
+                <button type="button" id="prevPreviewBtn" class="btn-nav" title="תמונה קודמת">◀</button>
+                <span id="previewIndexText">1 מתוך 5</span>
+                <button type="button" id="nextPreviewBtn" class="btn-nav" title="תמונה הבאה">▶</button>
+              </div>
+            </div>
+            
+            <div class="canvas-wrapper">
+              <canvas id="previewCanvas" width="600" height="400"></canvas>
+            </div>
+            
+            <div class="preview-footer">
+              <span id="previewNote" class="preview-note">
+                🌟 זוהי תמונת הדגמה כדי שתראו כיצד החותמת תיראה.
+              </span>
+              <button type="button" id="changeSampleBtn" class="btn-text">
+                🎲 החלף תמונת הדגמה
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- שלב 2: בחירת קבצים או תיקייה שלמה -->
+    <section class="card step-card">
+      <div class="step-header">
+        <span class="step-number">2</span>
+        <div>
+          <h2>באילו תמונות או קבצים להוסיף את החותמת?</h2>
+          <p>ניתן לבחור תיקייה שלמה מהמחשב או קבצים בודדים (תמונות ו-PDF)</p>
+        </div>
+      </div>
+
+      <div class="step-body">
+        
+        <!-- כפתורי בחירה גדולים וברורים -->
+        <div class="choose-buttons-row">
+          
+          <!-- בחירת תיקייה שלמה -->
+          <div class="choose-card" id="folderCard">
+            <div class="choose-icon">📁</div>
+            <h3>תיקייה שלמה מהמחשב</h3>
+            <p>מעבד את כל התמונות וה-PDF שנמצאים בתיקייה בבת אחת</p>
+            <button type="button" id="pickFolderBtn" class="btn btn-primary btn-large">
+              <span class="btn-icon">📂</span>
+              בחר תיקייה מהמחשב
+            </button>
+            <input type="file" id="fallbackFolderInput" webkitdirectory directory multiple class="file-input-hidden">
+          </div>
+
+          <!-- בחירת קבצים בודדים -->
+          <div class="choose-card" id="filesCard">
+            <div class="choose-icon">🖼️</div>
+            <h3>קבצים בודדים (או כמה קבצים)</h3>
+            <p>בחרו תמונה אחת, כמה תמונות, או קובצי PDF שברצונכם לסמן</p>
+            <label for="pickFilesInput" class="btn btn-outline btn-large">
+              <span class="btn-icon">📄</span>
+              בחר קבצים מהמחשב
+            </label>
+            <input type="file" id="pickFilesInput" multiple accept="image/jpeg,image/png,image/webp,image/bmp,application/pdf" class="file-input-hidden">
+          </div>
+
+        </div>
+
+        <!-- אזור גרירה ידידותי -->
+        <div id="dropZone" class="drop-zone">
+          <span class="drop-icon">📥</span>
+          <p class="drop-text">או פשוט גררו קבצים או תיקייה ישירות לכאן</p>
+        </div>
+
+        <!-- רשימת קבצים שנבחרו -->
+        <div id="selectedFilesSummary" class="selected-summary" style="display: none;">
+          <div class="summary-info">
+            <span class="summary-icon">✅</span>
+            <div>
+              <strong id="filesCountText">נבחרו 0 קבצים לעיבוד</strong>
+              <div id="folderOriginText" class="folder-origin-text"></div>
+            </div>
+          </div>
+          <button type="button" id="clearFilesBtn" class="btn-text-danger">
+            ✕ בטל בחירה ובחר שוב
+          </button>
+        </div>
+
+        <!-- בחירת יעד שמירה של הקבצים המעובדים -->
+        <div class="destination-card">
+          <div class="destination-header">
+            <span class="destination-icon">💾</span>
+            <div>
+              <h3>איפה תרצו שהקבצים החדשים יישמרו?</h3>
+              <p>הקבצים המקוריים שלכם לעולם לא יימחקו או ישתנו</p>
+            </div>
+          </div>
+
+          <div class="destination-options">
+            <label class="dest-option-card">
+              <input type="radio" name="destChoice" value="source_subfolder" checked>
+              <div class="dest-option-body">
+                <strong>באותה תיקייה שממנה נלקחו הקבצים</strong>
+                <span>ייווצר תיקייה חדשה בשם <code>תמונות_עם_סימן_מים</code> באותו המקום בדיוק</span>
+              </div>
+            </label>
+
+            <label class="dest-option-card">
+              <input type="radio" name="destChoice" value="custom_folder">
+              <div class="dest-option-body">
+                <strong>בחר תיקייה ספציפית אחרת במחשב</strong>
+                <span>שמירה ישירה לתיקייה שתבחרו בעצמכם (שולחן העבודה, כונן אחר וכו')</span>
+                <div id="customFolderRow" class="custom-folder-row" style="display: none;">
+                  <button type="button" id="chooseCustomFolderBtn" class="btn btn-outline btn-sm">
+                    <span class="btn-icon">📂</span>
+                    לחצו לבחירת תיקיית יעד...
+                  </button>
+                  <span id="chosenCustomFolderName" class="chosen-folder-label">טרם נבחרה תיקייה</span>
+                </div>
+              </div>
+            </label>
+
+            <label class="dest-option-card">
+              <input type="radio" name="destChoice" value="downloads">
+              <div class="dest-option-body">
+                <strong>תיקיית ההורדות של המחשב (Downloads)</strong>
+                <span>הורדה ישירה כקובץ בודד או כקובץ ZIP מרוכז</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- שלב 3: הפעלה ושמירה ברוגע -->
+    <section class="card step-card highlight-card">
+      <div class="step-header">
+        <span class="step-number">3</span>
+        <div>
+          <h2>מוכנים? נשאר רק ללחוץ ולהוריד!</h2>
+          <p>הקבצים המעובדים ישמרו ישירות במחשב שלכם</p>
+        </div>
+      </div>
+
+      <div class="step-body action-center">
+        
+        <button type="button" id="startProcessBtn" class="btn btn-success btn-huge" disabled>
+          <span class="btn-icon">✨</span>
+          <span id="startBtnLabel">קודם בחרו קבצים בשלב 2</span>
+        </button>
+
+        <!-- פס התקדמות ברור ומרגיע -->
+        <div id="progressArea" class="progress-area" style="display: none;">
+          <div class="progress-bar-container">
+            <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+          </div>
+          <div class="progress-status">
+            <span id="progressText">מעבד קבצים... אנא המתינו</span>
+            <span id="progressPercent">0%</span>
+          </div>
+        </div>
+
+        <!-- הודעת סיום נעימה -->
+        <div id="completedMessage" class="completed-box" style="display: none;">
+          <div class="completed-icon">🎉</div>
+          <h3>העיבוד הסתיים בהצלחה!</h3>
+          <p id="completedDetails">כל הקבצים קיבלו את החותמת בהצלחה.</p>
+          <div id="downloadZipContainer" style="display: none; margin-top: 15px;">
+            <button type="button" id="downloadZipBtn" class="btn btn-primary btn-large">
+              <span class="btn-icon">💾</span>
+              הורד את כל הקבצים כקובץ ZIP אחד
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- שאלות ותשובות והסברים למבוגרים -->
+    <section class="card faq-card">
+      <h2>💡 שאלות נפוצות ועזרה</h2>
+      <div class="faq-list">
+        
+        <details class="faq-item">
+          <summary>האם התמונות והקבצים שלי עולים לאינטרנט?</summary>
+          <div class="faq-answer">
+            <strong>לא, בשום אופן לא!</strong> כל פעולת הוספת סימן המים מתבצעת כולה בתוך המחשב שלכם בלבד. שום תמונה או קובץ PDF לא נשלחים לאף שרת חיצוני. הפרטיות שלכם מוגנת ב-100%.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>איפה נשמרים הקבצים החדשים עם סימן המים?</summary>
+          <div class="faq-answer">
+            לפי מה שבחרתם בשלב 2:
+            <ul>
+              <li><strong>באותה תיקייה:</strong> בתוך תיקייה חדשה בשם <code>תמונות_עם_סימן_מים</code>, כך שהקבצים המקוריים נשארים שלמים ובטוחים.</li>
+              <li><strong>בתיקייה שבחרתם בעצמכם:</strong> ישירות בתוך התיקייה שקבעתם במחשב.</li>
+              <li><strong>הורדות:</strong> בתיקיית <code>הורדות</code> (Downloads) של חלונות.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>האם ההגדרות שלי נשמרות לפעם הבאה?</summary>
+          <div class="faq-answer">
+            <strong>כן!</strong> הטקסט שהקלדתם, תמונת הלוגו שהעליתם, הזווית המדויקת, המיקום והשקיפות נשמרים אוטומטית בזיכרון המחשב שלכם, כך שבפעם הבאה שתפתחו את התוכנה – הכל יחכה לכם בדיוק כפי שהגדרתם.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>איך אפשר לפתוח את האפליקציה ישירות משולחן העבודה כמו תוכנה רגילה?</summary>
+          <div class="faq-answer">
+            בדפדפן (כגון Google Chrome או Microsoft Edge), לחצו על כפתור <strong>"התקן אפליקציה במחשב"</strong> בחלק העליון של הדף, או לחצו על סמל ההתקנה הקטן שמופיע בשורת הכתובת למעלה. יתווסף לכם אייקון נוח לשולחן העבודה של חלונות!
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- סרגל תחתון -->
+  <footer class="app-footer">
+    <p>סימן מים בקליק • פותח במיוחד עבור עבודה קלה, פרטית ושקטה בחלונות 11</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
